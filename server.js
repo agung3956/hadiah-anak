@@ -7,31 +7,72 @@ const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, "public");
 const DATA_DIR = path.join(__dirname, "data");
 const STORE_PATH = path.join(DATA_DIR, "store.json");
+const TIME_ZONE = "Asia/Jakarta";
 
 const defaultTasks = [
-  { id: "task-subuh", nama: "Subuh", ikon: "🕌", poin: 20, status: false },
-  { id: "task-dzuhur", nama: "Dzuhur", ikon: "🕌", poin: 20, status: false },
-  { id: "task-ashar", nama: "Ashar", ikon: "🕌", poin: 20, status: false },
-  { id: "task-maghrib", nama: "Maghrib", ikon: "🕌", poin: 20, status: false },
-  { id: "task-isya", nama: "Isya", ikon: "🕌", poin: 20, status: false },
-  { id: "task-ngaji", nama: "Ngaji", ikon: "📖", poin: 25, status: false },
-  { id: "task-murojaah", nama: "Murojaah", ikon: "🎧", poin: 25, status: false },
-  { id: "task-rumah", nama: "Bantu rumah", ikon: "🏠", poin: 10, status: false },
-  { id: "task-bersih", nama: "Bersih-bersih", ikon: "🧹", poin: 10, status: false },
-  { id: "task-cuci", nama: "Cuci piring", ikon: "🧽", poin: 10, status: false },
-  { id: "task-belajar", nama: "Belajar", ikon: "📚", poin: 15, status: false },
-  { id: "task-baju", nama: "Rapikan baju", ikon: "👕", poin: 10, status: false },
-  { id: "task-tanaman", nama: "Siram tanaman", ikon: "🌱", poin: 10, status: false },
-  { id: "task-sampah", nama: "Buang sampah", ikon: "🗑️", poin: 10, status: false },
-  { id: "task-main", nama: "Rapikan mainan", ikon: "🧸", poin: 10, status: false }
+  { id: "task-subuh", nama: "Subuh", ikon: "🕌", poin: 20 },
+  { id: "task-dzuhur", nama: "Dzuhur", ikon: "🕌", poin: 20 },
+  { id: "task-ashar", nama: "Ashar", ikon: "🕌", poin: 20 },
+  { id: "task-maghrib", nama: "Maghrib", ikon: "🕌", poin: 20 },
+  { id: "task-isya", nama: "Isya", ikon: "🕌", poin: 20 },
+  { id: "task-ngaji", nama: "Ngaji", ikon: "📖", poin: 25 },
+  { id: "task-murojaah", nama: "Murojaah", ikon: "🎧", poin: 25 },
+  { id: "task-rumah", nama: "Bantu rumah", ikon: "🏠", poin: 10 },
+  { id: "task-bersih", nama: "Bersih-bersih", ikon: "🧹", poin: 10 },
+  { id: "task-cuci", nama: "Cuci piring", ikon: "🧽", poin: 10 },
+  { id: "task-belajar", nama: "Belajar", ikon: "📚", poin: 15 },
+  { id: "task-baju", nama: "Rapikan baju", ikon: "👕", poin: 10 },
+  { id: "task-tanaman", nama: "Siram tanaman", ikon: "🌱", poin: 10 },
+  { id: "task-sampah", nama: "Buang sampah", ikon: "🗑️", poin: 10 },
+  { id: "task-main", nama: "Rapikan mainan", ikon: "🧸", poin: 10 }
+];
+
+const defaultPenaltyPresets = [
+  { id: "pen-lupa", nama: "Lupa tugas setelah diingatkan", poin: 5 },
+  { id: "pen-main", nama: "Mainan tidak dirapikan", poin: 10 },
+  { id: "pen-sopan", nama: "Bicara kurang sopan", poin: 15 },
+  { id: "pen-ribut", nama: "Mengganggu atau bertengkar", poin: 20 },
+  { id: "pen-jujur", nama: "Tidak jujur", poin: 25 }
 ];
 
 const defaultData = {
+  schemaVersion: 2,
   anakAktif: 0,
+  penaltyPresets: clone(defaultPenaltyPresets),
   anak: [
-    { id: "anak-ahmad", nama: "Ahmad Firdaus Thabrani", avatar: "🚀", warna: "#2563eb", poin: 0, tugas: clone(defaultTasks) },
-    { id: "anak-silsilia", nama: "Silsilia Raihana Adni", avatar: "🌈", warna: "#db2777", poin: 0, tugas: clone(defaultTasks) },
-    { id: "anak-aqso", nama: "Muhammad Aqso Darussalam", avatar: "⚽", warna: "#16a34a", poin: 0, tugas: clone(defaultTasks) }
+    {
+      id: "anak-ahmad",
+      nama: "Ahmad Firdaus Thabrani",
+      avatarText: "IM",
+      avatarName: "Iron Man",
+      warna: "#dc2626",
+      accent: "#facc15",
+      saldo: 0,
+      tugas: clone(defaultTasks),
+      harian: {}
+    },
+    {
+      id: "anak-silsilia",
+      nama: "Silsilia Raihana Adni",
+      avatarText: "MM",
+      avatarName: "My Melody",
+      warna: "#db2777",
+      accent: "#fecdd3",
+      saldo: 0,
+      tugas: clone(defaultTasks),
+      harian: {}
+    },
+    {
+      id: "anak-aqso",
+      nama: "Muhammad Aqso Darussalam",
+      avatarText: "TAYO",
+      avatarName: "Bus Tayo",
+      warna: "#2563eb",
+      accent: "#60a5fa",
+      saldo: 0,
+      tugas: clone(defaultTasks),
+      harian: {}
+    }
   ],
   hadiah: [
     { id: "gift-snack", nama: "Pilih camilan favorit" },
@@ -60,6 +101,17 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function todayKey() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+  const pick = type => parts.find(part => part.type === type).value;
+  return `${pick("year")}-${pick("month")}-${pick("day")}`;
+}
+
 function ensureStore() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(STORE_PATH)) writeStore(defaultData);
@@ -67,12 +119,92 @@ function ensureStore() {
 
 function readStore() {
   ensureStore();
-  return JSON.parse(fs.readFileSync(STORE_PATH, "utf8"));
+  const data = JSON.parse(fs.readFileSync(STORE_PATH, "utf8"));
+  return migrateData(data);
 }
 
 function writeStore(data) {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(STORE_PATH, JSON.stringify(data, null, 2));
+}
+
+function migrateData(data) {
+  const migrated = { ...clone(defaultData), ...data };
+  migrated.schemaVersion = 2;
+  migrated.penaltyPresets = Array.isArray(data.penaltyPresets) ? data.penaltyPresets : clone(defaultPenaltyPresets);
+  migrated.hadiah = normalizeGifts(data.hadiah);
+  migrated.riwayat = Array.isArray(data.riwayat) ? data.riwayat : [];
+  migrated.anak = (Array.isArray(data.anak) ? data.anak : defaultData.anak).map((child, index) => {
+    const template = defaultData.anak[index] || defaultData.anak[0];
+    const next = {
+      ...clone(template),
+      ...child,
+      saldo: Number.isFinite(Number(child.saldo)) ? Number(child.saldo) : Number(child.poin || 0),
+      tugas: normalizeTasks(child.tugas && child.tugas.length ? child.tugas : template.tugas),
+      harian: child.harian && typeof child.harian === "object" ? child.harian : {}
+    };
+    next.avatarText = template.avatarText;
+    next.avatarName = template.avatarName;
+    next.warna = template.warna;
+    next.accent = template.accent;
+    migrateLegacyCompleted(next);
+    getDay(next, todayKey());
+    delete next.poin;
+    return next;
+  });
+  return migrated;
+}
+
+function normalizeTasks(tasks) {
+  return tasks.map((task, index) => ({
+    id: task.id || newId(`task-${index}`),
+    nama: cleanText(task.nama, "Misi"),
+    ikon: cleanText(task.ikon, "⭐").slice(0, 8),
+    poin: clampPoints(task.poin)
+  }));
+}
+
+function normalizeGifts(gifts) {
+  if (!Array.isArray(gifts)) return clone(defaultData.hadiah);
+  return gifts.map((gift, index) => (
+    typeof gift === "string"
+      ? { id: newId(`gift-${index}`), nama: cleanText(gift, "Hadiah") }
+      : { id: gift.id || newId(`gift-${index}`), nama: cleanText(gift.nama, "Hadiah") }
+  ));
+}
+
+function migrateLegacyCompleted(child) {
+  const legacyDone = (child.tugas || []).filter(task => task.status).map(task => task.id);
+  if (!legacyDone.length) return;
+  const day = getDay(child, todayKey());
+  legacyDone.forEach(taskId => {
+    if (!day.completed.includes(taskId)) {
+      const task = child.tugas.find(item => item.id === taskId);
+      day.completed.push(taskId);
+      day.earned += Number(task ? task.poin : 0);
+    }
+  });
+}
+
+function getDay(child, date) {
+  if (!child.harian) child.harian = {};
+  if (!child.harian[date]) {
+    child.harian[date] = {
+      tanggal: date,
+      completed: [],
+      earned: 0,
+      deducted: 0,
+      penalties: [],
+      gacha: []
+    };
+  }
+  const day = child.harian[date];
+  day.completed = Array.isArray(day.completed) ? day.completed : [];
+  day.earned = Number(day.earned || 0);
+  day.deducted = Number(day.deducted || 0);
+  day.penalties = Array.isArray(day.penalties) ? day.penalties : [];
+  day.gacha = Array.isArray(day.gacha) ? day.gacha : [];
+  return day;
 }
 
 function sendJson(res, status, body) {
@@ -112,15 +244,28 @@ function clampPoints(value) {
   return Math.max(1, Math.min(500, Math.round(number)));
 }
 
+function clampPenalty(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 5;
+  return Math.max(1, Math.min(100, Math.round(number)));
+}
+
 function getChild(data, childId) {
   return data.anak.find(child => child.id === childId);
+}
+
+function taskStatus(child, taskId, date = todayKey()) {
+  return getDay(child, date).completed.includes(taskId);
 }
 
 async function handleApi(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const data = readStore();
+  const date = cleanText(url.searchParams.get("date"), todayKey()) || todayKey();
 
   if (req.method === "GET" && url.pathname === "/api/state") {
+    data.today = todayKey();
+    writeStore(data);
     sendJson(res, 200, { ok: true, data });
     return;
   }
@@ -150,8 +295,7 @@ async function handleApi(req, res) {
       id: newId("task"),
       nama,
       ikon: cleanText(body.ikon, "⭐").slice(0, 8),
-      poin: clampPoints(body.poin),
-      status: false
+      poin: clampPoints(body.poin)
     });
     writeStore(data);
     sendJson(res, 201, { ok: true, data });
@@ -167,12 +311,19 @@ async function handleApi(req, res) {
       sendJson(res, 404, { ok: false, error: "Tugas tidak ditemukan." });
       return;
     }
+    const day = getDay(child, body.date || todayKey());
     if (Object.prototype.hasOwnProperty.call(body, "status")) {
       const nextStatus = Boolean(body.status);
-      if (task.status !== nextStatus) {
-        task.status = nextStatus;
-        child.poin += nextStatus ? Number(task.poin) : -Number(task.poin);
-        if (child.poin < 0) child.poin = 0;
+      const done = day.completed.includes(taskId);
+      if (nextStatus && !done) {
+        day.completed.push(taskId);
+        day.earned += Number(task.poin);
+        child.saldo += Number(task.poin);
+      }
+      if (!nextStatus && done) {
+        day.completed = day.completed.filter(id => id !== taskId);
+        day.earned = Math.max(0, day.earned - Number(task.poin));
+        child.saldo = Math.max(0, child.saldo - Number(task.poin));
       }
     }
     if (body.nama !== undefined) task.nama = cleanText(body.nama, task.nama);
@@ -193,7 +344,13 @@ async function handleApi(req, res) {
       return;
     }
     const [task] = child.tugas.splice(index, 1);
-    if (task.status) child.poin = Math.max(0, child.poin - Number(task.poin));
+    Object.values(child.harian || {}).forEach(day => {
+      if (day.completed && day.completed.includes(taskId)) {
+        day.completed = day.completed.filter(id => id !== taskId);
+        day.earned = Math.max(0, Number(day.earned || 0) - Number(task.poin));
+        child.saldo = Math.max(0, child.saldo - Number(task.poin));
+      }
+    });
     writeStore(data);
     sendJson(res, 200, { ok: true, data });
     return;
@@ -206,10 +363,12 @@ async function handleApi(req, res) {
       sendJson(res, 404, { ok: false, error: "Anak tidak ditemukan." });
       return;
     }
+    const day = getDay(child, body.date || todayKey());
     child.tugas.forEach(task => {
-      if (!task.status) {
-        task.status = true;
-        child.poin += Number(task.poin);
+      if (!day.completed.includes(task.id)) {
+        day.completed.push(task.id);
+        day.earned += Number(task.poin);
+        child.saldo += Number(task.poin);
       }
     });
     writeStore(data);
@@ -224,9 +383,38 @@ async function handleApi(req, res) {
       sendJson(res, 404, { ok: false, error: "Anak tidak ditemukan." });
       return;
     }
-    child.tugas = child.tugas.map(task => ({ ...task, status: false }));
+    const day = getDay(child, body.date || todayKey());
+    child.saldo = Math.max(0, child.saldo - Number(day.earned || 0) + Number(day.deducted || 0));
+    day.completed = [];
+    day.earned = 0;
+    day.deducted = 0;
+    day.penalties = [];
     writeStore(data);
     sendJson(res, 200, { ok: true, data });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/penalties") {
+    const body = await readBody(req);
+    const child = getChild(data, body.childId);
+    const nama = cleanText(body.nama);
+    const poin = clampPenalty(body.poin);
+    if (!child || !nama) {
+      sendJson(res, 400, { ok: false, error: "Data pengurang belum lengkap." });
+      return;
+    }
+    const day = getDay(child, body.date || todayKey());
+    const entry = {
+      id: newId("penalty"),
+      nama,
+      poin,
+      waktu: new Date().toISOString()
+    };
+    day.penalties.unshift(entry);
+    day.deducted += poin;
+    child.saldo = Math.max(0, child.saldo - poin);
+    writeStore(data);
+    sendJson(res, 201, { ok: true, data, penalty: entry });
     return;
   }
 
@@ -277,7 +465,7 @@ async function handleApi(req, res) {
       sendJson(res, 404, { ok: false, error: "Anak tidak ditemukan." });
       return;
     }
-    if (child.poin < 1000) {
+    if (child.saldo < 1000) {
       sendJson(res, 400, { ok: false, error: "Poin belum cukup." });
       return;
     }
@@ -286,16 +474,19 @@ async function handleApi(req, res) {
       return;
     }
     const hadiah = data.hadiah[Math.floor(Math.random() * data.hadiah.length)];
-    child.poin -= 1000;
+    const day = getDay(child, body.date || todayKey());
+    child.saldo -= 1000;
     const entry = {
       id: newId("win"),
       childId: child.id,
       childName: child.nama,
       hadiah: hadiah.nama,
+      tanggal: day.tanggal,
       waktu: new Date().toISOString()
     };
+    day.gacha.unshift(entry);
     data.riwayat.unshift(entry);
-    data.riwayat = data.riwayat.slice(0, 20);
+    data.riwayat = data.riwayat.slice(0, 50);
     writeStore(data);
     sendJson(res, 200, { ok: true, data, hadiah: entry });
     return;

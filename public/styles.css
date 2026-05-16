@@ -151,6 +151,7 @@ button {
 .dashboard,
 .progress-panel,
 .mission-board,
+.penalty-panel,
 .reward-panel,
 .manage-panel,
 .history-panel {
@@ -256,11 +257,27 @@ button {
   width: 112px;
   height: 112px;
   border-radius: 34px;
-  background: #fff;
+  background:
+    linear-gradient(135deg, var(--active-color, #2563eb), var(--active-accent, #facc15));
+  color: #fff;
   display: grid;
   place-items: center;
-  font-size: 4rem;
+  font-size: 2.1rem;
+  font-weight: 900;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
   box-shadow: inset 0 -8px 0 rgba(15, 23, 42, 0.08);
+}
+
+.avatar[data-avatar="My Melody"] {
+  color: #9f1239;
+  background:
+    radial-gradient(circle at 50% 12%, #fff 0 16%, transparent 17%),
+    linear-gradient(135deg, #f9a8d4, #fff1f2);
+}
+
+.avatar[data-avatar="Bus Tayo"] {
+  background:
+    linear-gradient(180deg, #60a5fa 0 58%, #1d4ed8 59% 100%);
 }
 
 .player-card h2 {
@@ -328,6 +345,7 @@ button {
 }
 
 .mission-board,
+.penalty-panel,
 .reward-panel,
 .history-panel {
   margin-top: 18px;
@@ -419,6 +437,39 @@ button {
   color: var(--muted);
   font-size: 0.8rem;
   font-weight: 900;
+}
+
+.penalty-panel {
+  margin-top: 18px;
+  padding: 18px;
+}
+
+.penalty-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.penalty-button {
+  min-height: 86px;
+  border: 0;
+  border-radius: 20px;
+  padding: 10px;
+  background: #fff1f2;
+  color: #9f1239;
+  font-weight: 900;
+  box-shadow: inset 0 -5px 0 rgba(159, 18, 57, 0.1);
+}
+
+.penalty-button span {
+  display: block;
+  color: #be123c;
+  margin-top: 4px;
+}
+
+.penalty-form {
+  grid-template-columns: 1fr 150px auto;
+  margin-top: 12px;
 }
 
 .reward-panel {
@@ -516,6 +567,15 @@ select:focus {
   font-weight: 900;
 }
 
+.danger-button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 16px;
+  background: #e11d48;
+  color: #fff;
+  font-weight: 900;
+}
+
 .list {
   display: grid;
   gap: 9px;
@@ -572,6 +632,50 @@ select:focus {
   border-radius: 16px;
 }
 
+.daily-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.daily-card {
+  border-radius: 20px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.daily-card.today {
+  outline: 4px solid rgba(250, 204, 21, 0.55);
+}
+
+.daily-date {
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.daily-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.daily-stats span {
+  display: block;
+  padding: 8px;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.daily-stats strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
 @keyframes floaty {
   0%, 100% {
     transform: translateY(0) rotate(0deg);
@@ -585,7 +689,8 @@ select:focus {
   .hero,
   .dashboard,
   .reward-panel,
-  .manage-grid {
+  .manage-grid,
+  .penalty-form {
     grid-template-columns: 1fr;
   }
 
@@ -599,6 +704,11 @@ select:focus {
 
   .mission-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .penalty-grid,
+  .daily-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -623,6 +733,7 @@ select:focus {
 
   .dashboard,
   .mission-board,
+  .penalty-panel,
   .reward-panel,
   .manage-panel,
   .history-panel,
@@ -651,5 +762,10 @@ select:focus {
   .form-row,
   .list-row {
     grid-template-columns: 1fr auto;
+  }
+
+  .penalty-grid,
+  .daily-grid {
+    grid-template-columns: 1fr;
   }
 }

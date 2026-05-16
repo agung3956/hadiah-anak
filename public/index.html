@@ -32,7 +32,7 @@
         <span class="dot online" id="connectionDot"></span>
         <span id="connectionText">Menghubungkan data...</span>
       </div>
-      <div id="lastSaved">Siap bermain</div>
+      <div><span id="todayLabel">Hari ini</span> · <span id="lastSaved">Siap bermain</span></div>
     </section>
 
     <section class="children-tabs" id="anakTabs" aria-label="Pilih anak"></section>
@@ -43,7 +43,7 @@
         <div>
           <p class="mini-label">Sekarang giliran</p>
           <h2 id="namaAnakAktif">Memuat...</h2>
-          <p><strong id="poinAnakAktif">0</strong> poin terkumpul</p>
+          <p><strong id="poinAnakAktif">0</strong> saldo poin</p>
         </div>
       </article>
 
@@ -57,8 +57,8 @@
           <p>Selesai</p>
         </article>
         <article class="score-card">
-          <span id="nilai">0%</span>
-          <p>Nilai hari ini</p>
+          <span id="nilai">0</span>
+          <p>Poin bersih hari ini</p>
         </article>
       </div>
     </section>
@@ -71,6 +71,27 @@
       <div class="progress-wrap">
         <div class="progress" id="progress"></div>
       </div>
+    </section>
+
+    <section class="penalty-panel">
+      <div class="section-heading compact">
+        <div>
+          <p class="mini-label">Konsekuensi ringan</p>
+          <h2>Nilai Pengurang</h2>
+        </div>
+      </div>
+      <div class="penalty-grid" id="penaltyGrid"></div>
+      <form class="form penalty-form" id="penaltyForm">
+        <input id="inputPenalty" type="text" maxlength="80" placeholder="Pengurang khusus" autocomplete="off" />
+        <select id="inputPenaltyPoin" aria-label="Poin pengurang">
+          <option value="5">-5 poin</option>
+          <option value="10" selected>-10 poin</option>
+          <option value="15">-15 poin</option>
+          <option value="20">-20 poin</option>
+          <option value="25">-25 poin</option>
+        </select>
+        <button class="danger-button" type="submit">Kurangi Poin</button>
+      </form>
     </section>
 
     <section class="mission-board">
@@ -140,8 +161,18 @@
     <section class="history-panel">
       <div class="section-heading compact">
         <div>
+          <p class="mini-label">Tanggal dan perjalanan</p>
+          <h2>History Harian</h2>
+        </div>
+      </div>
+      <div class="daily-grid" id="dailyJourney"></div>
+    </section>
+
+    <section class="history-panel">
+      <div class="section-heading compact">
+        <div>
           <p class="mini-label">Kemenangan terbaru</p>
-          <h2>Riwayat Hadiah</h2>
+          <h2>Riwayat Gacha</h2>
         </div>
       </div>
       <div class="list" id="riwayatHadiah"></div>

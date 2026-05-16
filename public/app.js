@@ -4,18 +4,30 @@ const ikonPilihan = [
   "🚲", "💪", "🍎", "🎒", "✅", "💡", "🎁", "🍬", "🎮", "📺"
 ];
 
+const fallbackPenaltyPresets = [
+  { id: "pen-lupa", nama: "Lupa tugas setelah diingatkan", poin: 5 },
+  { id: "pen-main", nama: "Mainan tidak dirapikan", poin: 10 },
+  { id: "pen-sopan", nama: "Bicara kurang sopan", poin: 15 },
+  { id: "pen-ribut", nama: "Mengganggu atau bertengkar", poin: 20 },
+  { id: "pen-jujur", nama: "Tidak jujur", poin: 25 }
+];
+
 const fallbackData = {
+  schemaVersion: 2,
+  today: todayKey(),
   anakAktif: 0,
+  penaltyPresets: fallbackPenaltyPresets,
   anak: [
-    { id: "anak-ahmad", nama: "Ahmad Firdaus Thabrani", avatar: "🚀", warna: "#2563eb", poin: 0, tugas: [] },
-    { id: "anak-silsilia", nama: "Silsilia Raihana Adni", avatar: "🌈", warna: "#db2777", poin: 0, tugas: [] },
-    { id: "anak-aqso", nama: "Muhammad Aqso Darussalam", avatar: "⚽", warna: "#16a34a", poin: 0, tugas: [] }
+    { id: "anak-ahmad", nama: "Ahmad Firdaus Thabrani", avatarText: "IM", avatarName: "Iron Man", warna: "#dc2626", accent: "#facc15", saldo: 0, tugas: [], harian: {} },
+    { id: "anak-silsilia", nama: "Silsilia Raihana Adni", avatarText: "MM", avatarName: "My Melody", warna: "#db2777", accent: "#fecdd3", saldo: 0, tugas: [], harian: {} },
+    { id: "anak-aqso", nama: "Muhammad Aqso Darussalam", avatarText: "TAYO", avatarName: "Bus Tayo", warna: "#2563eb", accent: "#60a5fa", saldo: 0, tugas: [], harian: {} }
   ],
   hadiah: [],
   riwayat: []
 };
 
 let data = structuredClone(fallbackData);
+let selectedDate = todayKey();
 let lastGacha = null;
 let audioContext = null;
 let musicTimer = null;
@@ -39,19 +51,25 @@ const elements = {
   tasks: $("#daftarTugas"),
   gifts: $("#daftarHadiah"),
   history: $("#riwayatHadiah"),
+  dailyJourney: $("#dailyJourney"),
+  penaltyGrid: $("#penaltyGrid"),
   result: $("#hasilGacha"),
   gacha: $("#btnGacha"),
   taskForm: $("#taskForm"),
   giftForm: $("#giftForm"),
+  penaltyForm: $("#penaltyForm"),
   taskName: $("#inputTugas"),
   taskIcon: $("#inputIkon"),
   taskPoints: $("#inputPoin"),
   giftName: $("#inputHadiah"),
+  penaltyName: $("#inputPenalty"),
+  penaltyPoints: $("#inputPenaltyPoin"),
   completeAll: $("#completeAllButton"),
   resetDay: $("#resetDayButton"),
   connectionDot: $("#connectionDot"),
   connectionText: $("#connectionText"),
   lastSaved: $("#lastSaved"),
+  todayLabel: $("#todayLabel"),
   musicButton: $("#musicButton"),
   musicIcon: $("#musicIcon"),
   musicLabel: $("#musicLabel")
@@ -59,6 +77,49 @@ const elements = {
 
 function anakSekarang() {
   return data.anak[data.anakAktif] || data.anak[0];
+}
+
+function getDay(child, date = selectedDate) {
+  child.harian ||= {};
+  child.harian[date] ||= {
+    tanggal: date,
+    completed: [],
+    earned: 0,
+    deducted: 0,
+    penalties: [],
+    gacha: []
+  };
+  const day = child.harian[date];
+  day.completed ||= [];
+  day.penalties ||= [];
+  day.gacha ||= [];
+  day.earned = Number(day.earned || 0);
+  day.deducted = Number(day.deducted || 0);
+  return day;
+}
+
+function normalizeData() {
+  data.today ||= todayKey();
+  selectedDate = data.today;
+  data.penaltyPresets ||= fallbackPenaltyPresets;
+  data.anak = data.anak.map((child, index) => {
+    const fallback = fallbackData.anak[index] || fallbackData.anak[0];
+    child.avatarText = fallback.avatarText;
+    child.avatarName = fallback.avatarName;
+    child.warna = fallback.warna;
+    child.accent = fallback.accent;
+    child.saldo = Number.isFinite(Number(child.saldo)) ? Number(child.saldo) : Number(child.poin || 0);
+    child.harian ||= {};
+    getDay(child, selectedDate);
+    delete child.poin;
+    child.tugas = (child.tugas || []).map(task => ({
+      id: task.id || `task-${Date.now()}-${Math.random()}`,
+      nama: task.nama || "Misi",
+      ikon: task.ikon || "⭐",
+      poin: Number(task.poin || 10)
+    }));
+    return child;
+  });
 }
 
 function isiPilihanIkon() {
@@ -76,6 +137,7 @@ async function api(path, options = {}) {
   if (!response.ok || !payload.ok) throw new Error(payload.error || "Server tidak merespons.");
   if (payload.data) {
     data = payload.data;
+    normalizeData();
     persistLocal();
   }
   return payload;
@@ -87,7 +149,10 @@ function persistLocal() {
 
 function restoreLocal() {
   const saved = localStorage.getItem("tombolHadiahState");
-  if (saved) data = JSON.parse(saved);
+  if (saved) {
+    data = JSON.parse(saved);
+    normalizeData();
+  }
 }
 
 async function loadState() {
@@ -96,6 +161,7 @@ async function loadState() {
   try {
     const payload = await api("/api/state");
     data = payload.data;
+    normalizeData();
     offlineMode = false;
     updateConnection(true, "Data terhubung ke server");
   } catch (error) {
@@ -133,11 +199,15 @@ async function mutate(path, options, localChange) {
 }
 
 function render() {
+  normalizeData();
+  elements.todayLabel.textContent = formatDateOnly(selectedDate);
   renderTabsAnak();
   renderDashboard();
   renderMissions();
+  renderPenalties();
   renderTaskList();
   renderGifts();
+  renderDailyJourney();
   renderHistory();
   renderGacha();
 }
@@ -145,10 +215,10 @@ function render() {
 function renderTabsAnak() {
   elements.tabs.innerHTML = data.anak.map((anak, index) => `
     <button class="child-tab ${index === data.anakAktif ? "active" : ""}" style="--accent:${anak.warna}" data-child-index="${index}" type="button">
-      <span class="face">${escapeHtml(anak.avatar)}</span>
+      <span class="face avatar-mini" style="background:linear-gradient(135deg, ${anak.warna}, ${anak.accent});">${escapeHtml(anak.avatarText)}</span>
       <span>
         <strong>${escapeHtml(shortName(anak.nama))}</strong>
-        <span>${anak.poin} poin</span>
+        <span>${anak.saldo} saldo poin</span>
       </span>
     </button>
   `).join("");
@@ -160,49 +230,79 @@ function renderTabsAnak() {
 
 function renderDashboard() {
   const anak = anakSekarang();
+  const day = getDay(anak);
   const total = anak.tugas.length;
-  const selesai = anak.tugas.filter(item => item.status).length;
-  const nilai = total === 0 ? 0 : Math.round((selesai / total) * 100);
-  const gachaProgress = Math.min(100, Math.round((anak.poin / 1000) * 100));
+  const selesai = day.completed.length;
+  const net = day.earned - day.deducted;
+  const remainder = anak.saldo % 1000;
+  const chances = Math.floor(anak.saldo / 1000);
+  const gachaProgress = chances > 0 ? 100 : Math.min(100, Math.round((remainder / 1000) * 100));
 
   elements.playerCard.style.setProperty("--active-color", anak.warna || "#2563eb");
-  elements.avatar.textContent = anak.avatar || "⭐";
+  elements.playerCard.style.setProperty("--active-accent", anak.accent || "#facc15");
+  elements.avatar.textContent = anak.avatarText || "⭐";
+  elements.avatar.dataset.avatar = anak.avatarName || "";
   elements.nama.textContent = anak.nama;
-  elements.poin.textContent = anak.poin;
+  elements.poin.textContent = anak.saldo;
   elements.total.textContent = total;
   elements.selesai.textContent = selesai;
-  elements.nilai.textContent = `${nilai}%`;
+  elements.nilai.textContent = net >= 0 ? `+${net}` : `${net}`;
   elements.progress.style.width = `${gachaProgress}%`;
-  elements.progressText.textContent = `${anak.poin} dari 1000 poin`;
+  elements.progressText.textContent = chances > 0
+    ? `${chances} kesempatan gacha tersedia`
+    : `${remainder} dari 1000 poin`;
 }
 
 function renderMissions() {
   const anak = anakSekarang();
-  elements.grid.innerHTML = anak.tugas.map(task => `
-    <button class="mission-button ${task.status ? "done" : ""}" data-task-toggle="${task.id}" type="button">
-      <span class="mission-icon">${escapeHtml(task.ikon)}</span>
-      <span class="mission-name">${escapeHtml(task.nama)}</span>
-      <span class="mission-points">${task.status ? "Selesai" : `${task.poin} poin`}</span>
-    </button>
-  `).join("") || `<div class="empty">Belum ada misi untuk anak ini.</div>`;
+  const day = getDay(anak);
+  elements.grid.innerHTML = anak.tugas.map(task => {
+    const done = day.completed.includes(task.id);
+    return `
+      <button class="mission-button ${done ? "done" : ""}" data-task-toggle="${task.id}" type="button">
+        <span class="mission-icon">${escapeHtml(task.ikon)}</span>
+        <span class="mission-name">${escapeHtml(task.nama)}</span>
+        <span class="mission-points">${done ? "Selesai" : `${task.poin} poin`}</span>
+      </button>
+    `;
+  }).join("") || `<div class="empty">Belum ada misi untuk anak ini.</div>`;
 
   elements.grid.querySelectorAll("[data-task-toggle]").forEach(button => {
     button.addEventListener("click", () => toggleTask(button.dataset.taskToggle));
   });
 }
 
+function renderPenalties() {
+  const presets = data.penaltyPresets || fallbackPenaltyPresets;
+  elements.penaltyGrid.innerHTML = presets.map(item => `
+    <button class="penalty-button" data-penalty="${item.id}" type="button">
+      ${escapeHtml(item.nama)}
+      <span>-${item.poin} poin</span>
+    </button>
+  `).join("");
+
+  elements.penaltyGrid.querySelectorAll("[data-penalty]").forEach(button => {
+    const item = presets.find(preset => preset.id === button.dataset.penalty);
+    button.addEventListener("click", () => applyPenalty(item.nama, item.poin));
+  });
+}
+
 function renderTaskList() {
   const anak = anakSekarang();
-  elements.tasks.innerHTML = anak.tugas.map(task => `
-    <div class="list-row ${task.status ? "done" : ""}">
-      <div>
-        <div class="list-title">${escapeHtml(task.ikon)} ${escapeHtml(task.nama)}</div>
-        <div class="list-subtitle">${task.poin} poin</div>
+  const day = getDay(anak);
+  elements.tasks.innerHTML = anak.tugas.map(task => {
+    const done = day.completed.includes(task.id);
+    return `
+      <div class="list-row ${done ? "done" : ""}">
+        <div>
+          <div class="list-title">${escapeHtml(task.ikon)} ${escapeHtml(task.nama)}</div>
+          <div class="list-subtitle">${task.poin} poin · ${done ? "selesai hari ini" : "belum selesai"}</div>
+        </div>
+        <button class="tiny-button" data-task-edit="${task.id}" type="button" title="Edit misi">✎</button>
+        <button class="tiny-button danger" data-task-delete="${task.id}" type="button" title="Hapus misi">×</button>
       </div>
-      <button class="tiny-button" data-task-edit="${task.id}" type="button" title="Edit misi">✎</button>
-      <button class="tiny-button danger" data-task-delete="${task.id}" type="button" title="Hapus misi">×</button>
-    </div>
-  `).join("") || `<div class="empty">Tambahkan misi pertama.</div>`;
+    `;
+  }).join("") || `<div class="empty">Tambahkan misi pertama.</div>`;
 
   elements.tasks.querySelectorAll("[data-task-edit]").forEach(button => {
     button.addEventListener("click", () => editTask(button.dataset.taskEdit));
@@ -231,12 +331,34 @@ function renderGifts() {
   });
 }
 
+function renderDailyJourney() {
+  const anak = anakSekarang();
+  const dates = Object.keys(anak.harian || {}).sort().reverse().slice(0, 9);
+  elements.dailyJourney.innerHTML = dates.map(date => {
+    const day = getDay(anak, date);
+    const net = day.earned - day.deducted;
+    return `
+      <article class="daily-card ${date === selectedDate ? "today" : ""}">
+        <div class="daily-date">${escapeHtml(formatDateOnly(date))}</div>
+        <div class="daily-stats">
+          <span><strong>+${day.earned}</strong> didapat</span>
+          <span><strong>-${day.deducted}</strong> pengurang</span>
+          <span><strong>${net >= 0 ? `+${net}` : net}</strong> bersih</span>
+          <span><strong>${day.gacha.length}</strong> gacha</span>
+        </div>
+      </article>
+    `;
+  }).join("") || `<div class="empty">Belum ada perjalanan harian.</div>`;
+}
+
 function renderHistory() {
-  elements.history.innerHTML = (data.riwayat || []).slice(0, 6).map(item => `
+  const anak = anakSekarang();
+  const history = (data.riwayat || []).filter(item => item.childId === anak.id).slice(0, 8);
+  elements.history.innerHTML = history.map(item => `
     <div class="list-row">
       <div>
         <div class="list-title">${escapeHtml(item.childName)} mendapatkan ${escapeHtml(item.hadiah)}</div>
-        <div class="list-subtitle">${formatDate(item.waktu)}</div>
+        <div class="list-subtitle">${formatDateOnly(item.tanggal || item.waktu)} · ${formatTime(item.waktu)}</div>
       </div>
     </div>
   `).join("") || `<div class="empty">Belum ada hadiah yang terbuka.</div>`;
@@ -244,8 +366,9 @@ function renderHistory() {
 
 function renderGacha() {
   const anak = anakSekarang();
-  elements.gacha.disabled = anak.poin < 1000 || data.hadiah.length === 0;
-  elements.gacha.querySelector("small").textContent = anak.poin >= 1000 ? "Siap dibuka" : "Butuh 1000 poin";
+  const chances = Math.floor(anak.saldo / 1000);
+  elements.gacha.disabled = chances < 1 || data.hadiah.length === 0;
+  elements.gacha.querySelector("small").textContent = chances > 0 ? `${chances} kesempatan tersedia` : "Butuh 1000 poin";
   if (lastGacha) {
     elements.result.hidden = false;
     elements.result.innerHTML = `🎉 Selamat, ${escapeHtml(lastGacha.childName)}!<br>Kamu mendapat: <strong>${escapeHtml(lastGacha.hadiah)}</strong>`;
@@ -263,16 +386,24 @@ async function setActiveChild(index) {
 
 async function toggleTask(taskId) {
   const anak = anakSekarang();
+  const day = getDay(anak);
   const task = anak.tugas.find(item => item.id === taskId);
   if (!task) return;
+  const done = day.completed.includes(taskId);
 
   await mutate(`/api/tasks/${encodeURIComponent(taskId)}`, {
     method: "PATCH",
-    body: JSON.stringify({ childId: anak.id, status: !task.status })
+    body: JSON.stringify({ childId: anak.id, date: selectedDate, status: !done })
   }, () => {
-    task.status = !task.status;
-    anak.poin += task.status ? Number(task.poin) : -Number(task.poin);
-    if (anak.poin < 0) anak.poin = 0;
+    if (done) {
+      day.completed = day.completed.filter(id => id !== taskId);
+      day.earned = Math.max(0, day.earned - Number(task.poin));
+      anak.saldo = Math.max(0, anak.saldo - Number(task.poin));
+    } else {
+      day.completed.push(taskId);
+      day.earned += Number(task.poin);
+      anak.saldo += Number(task.poin);
+    }
   });
 }
 
@@ -298,8 +429,7 @@ async function addTask(event) {
       id: `task-${Date.now()}`,
       nama,
       ikon: elements.taskIcon.value,
-      poin: Number(elements.taskPoints.value),
-      status: false
+      poin: Number(elements.taskPoints.value)
     });
   });
 
@@ -323,7 +453,7 @@ async function editTask(taskId) {
 
   await mutate(`/api/tasks/${encodeURIComponent(taskId)}`, {
     method: "PATCH",
-    body: JSON.stringify({ childId: anak.id, nama, ikon, poin: Number(poin) })
+    body: JSON.stringify({ childId: anak.id, date: selectedDate, nama, ikon, poin: Number(poin) })
   }, () => {
     task.nama = nama.trim();
     task.ikon = ikon.trim();
@@ -333,42 +463,76 @@ async function editTask(taskId) {
 
 async function deleteTask(taskId) {
   const anak = anakSekarang();
-  const task = anak.tugas.find(item => item.id === taskId);
-  if (!task || !confirm("Hapus misi ini?")) return;
+  if (!anak.tugas.find(item => item.id === taskId) || !confirm("Hapus misi ini?")) return;
 
   await mutate(`/api/tasks/${encodeURIComponent(taskId)}`, {
     method: "DELETE",
     body: JSON.stringify({ childId: anak.id })
   }, () => {
-    if (task.status) anak.poin = Math.max(0, anak.poin - Number(task.poin));
     anak.tugas = anak.tugas.filter(item => item.id !== taskId);
+    Object.values(anak.harian || {}).forEach(day => {
+      day.completed = (day.completed || []).filter(id => id !== taskId);
+    });
   });
 }
 
 async function completeAll() {
   const anak = anakSekarang();
+  const day = getDay(anak);
   await mutate("/api/tasks/complete-all", {
     method: "POST",
-    body: JSON.stringify({ childId: anak.id })
+    body: JSON.stringify({ childId: anak.id, date: selectedDate })
   }, () => {
     anak.tugas.forEach(task => {
-      if (!task.status) {
-        task.status = true;
-        anak.poin += Number(task.poin);
+      if (!day.completed.includes(task.id)) {
+        day.completed.push(task.id);
+        day.earned += Number(task.poin);
+        anak.saldo += Number(task.poin);
       }
     });
   });
 }
 
 async function resetDay() {
-  if (!confirm("Reset status misi hari ini? Poin tetap disimpan.")) return;
+  if (!confirm("Reset semua progres hari ini? Poin plus dan pengurang hari ini ikut dikembalikan.")) return;
   const anak = anakSekarang();
+  const day = getDay(anak);
   await mutate("/api/tasks/reset-day", {
     method: "POST",
-    body: JSON.stringify({ childId: anak.id })
+    body: JSON.stringify({ childId: anak.id, date: selectedDate })
   }, () => {
-    anak.tugas = anak.tugas.map(task => ({ ...task, status: false }));
+    anak.saldo = Math.max(0, anak.saldo - Number(day.earned || 0) + Number(day.deducted || 0));
+    day.completed = [];
+    day.earned = 0;
+    day.deducted = 0;
+    day.penalties = [];
   });
+}
+
+async function applyPenalty(nama, poin) {
+  const anak = anakSekarang();
+  const day = getDay(anak);
+  await mutate("/api/penalties", {
+    method: "POST",
+    body: JSON.stringify({ childId: anak.id, date: selectedDate, nama, poin: Number(poin) })
+  }, () => {
+    const entry = { id: `penalty-${Date.now()}`, nama, poin: Number(poin), waktu: new Date().toISOString() };
+    day.penalties.unshift(entry);
+    day.deducted += Number(poin);
+    anak.saldo = Math.max(0, anak.saldo - Number(poin));
+  });
+}
+
+async function addCustomPenalty(event) {
+  event.preventDefault();
+  const nama = elements.penaltyName.value.trim();
+  const poin = Number(elements.penaltyPoints.value);
+  if (!nama) {
+    alert("Isi alasan pengurang dulu.");
+    return;
+  }
+  await applyPenalty(nama, poin);
+  elements.penaltyName.value = "";
 }
 
 async function addGift(event) {
@@ -416,7 +580,7 @@ async function deleteGift(giftId) {
 
 async function runGacha() {
   const anak = anakSekarang();
-  if (anak.poin < 1000) {
+  if (anak.saldo < 1000) {
     alert("Poin belum cukup. Kumpulkan 1000 poin dulu.");
     return;
   }
@@ -427,15 +591,18 @@ async function runGacha() {
 
   if (offlineMode) {
     const gift = data.hadiah[Math.floor(Math.random() * data.hadiah.length)];
-    anak.poin -= 1000;
+    const day = getDay(anak);
+    anak.saldo -= 1000;
     lastGacha = {
       id: `win-${Date.now()}`,
       childId: anak.id,
       childName: anak.nama,
       hadiah: gift.nama,
+      tanggal: selectedDate,
       waktu: new Date().toISOString()
     };
-    data.riwayat = [lastGacha, ...(data.riwayat || [])].slice(0, 20);
+    day.gacha.unshift(lastGacha);
+    data.riwayat = [lastGacha, ...(data.riwayat || [])].slice(0, 50);
     persistLocal();
     savedNow();
     render();
@@ -445,7 +612,7 @@ async function runGacha() {
   try {
     const payload = await api("/api/gacha", {
       method: "POST",
-      body: JSON.stringify({ childId: anak.id })
+      body: JSON.stringify({ childId: anak.id, date: selectedDate })
     });
     lastGacha = payload.hadiah;
     savedNow();
@@ -493,11 +660,8 @@ function stopMusic() {
 }
 
 function toggleMusic() {
-  if (isMusicPlaying) {
-    stopMusic();
-  } else {
-    startMusic();
-  }
+  if (isMusicPlaying) stopMusic();
+  else startMusic();
 }
 
 function playMelody() {
@@ -510,7 +674,6 @@ function playMelody() {
     [659.25, 3.3], [698.46, 3.58], [783.99, 3.86],
     [783.99, 4.24], [880, 4.52], [783.99, 4.8], [698.46, 5.08], [659.25, 5.36]
   ];
-
   notes.forEach(([frequency, offset]) => playTone(context, frequency, now + offset, 0.2));
 }
 
@@ -533,17 +696,39 @@ function updateMusicUi() {
   elements.musicLabel.textContent = isMusicPlaying ? "Nyala" : "Musik";
 }
 
+function todayKey() {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
+  const parts = formatter.formatToParts(new Date());
+  const pick = type => parts.find(part => part.type === type).value;
+  return `${pick("year")}-${pick("month")}-${pick("day")}`;
+}
+
 function shortName(name) {
   return name.split(" ").slice(0, 2).join(" ");
 }
 
-function formatDate(value) {
+function formatDateOnly(value) {
   if (!value) return "";
-  return new Date(value).toLocaleString("id-ID", {
+  const date = value.includes("T") ? new Date(value) : new Date(`${value}T00:00:00+07:00`);
+  return date.toLocaleDateString("id-ID", {
     day: "2-digit",
     month: "short",
+    year: "numeric",
+    timeZone: "Asia/Jakarta"
+  });
+}
+
+function formatTime(value) {
+  if (!value) return "";
+  return new Date(value).toLocaleTimeString("id-ID", {
     hour: "2-digit",
-    minute: "2-digit"
+    minute: "2-digit",
+    timeZone: "Asia/Jakarta"
   });
 }
 
@@ -558,6 +743,7 @@ function escapeHtml(value) {
 
 elements.taskForm.addEventListener("submit", addTask);
 elements.giftForm.addEventListener("submit", addGift);
+elements.penaltyForm.addEventListener("submit", addCustomPenalty);
 elements.completeAll.addEventListener("click", completeAll);
 elements.resetDay.addEventListener("click", resetDay);
 elements.gacha.addEventListener("click", runGacha);
