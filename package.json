@@ -1,0 +1,19 @@
+{
+  "name": "tombol-hadiah",
+  "version": "1.0.0",
+  "description": "Aplikasi monitoring tugas dan hadiah anak dengan backend JSON sederhana.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "anak",
+    "tugas",
+    "hadiah",
+    "monitoring"
+  ],
+  "license": "MIT"
+}

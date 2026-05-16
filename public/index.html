@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tombol Hadiah Anak</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <span class="shape star-a">★</span>
+    <span class="shape star-b">✦</span>
+    <span class="shape cloud-a">☁</span>
+    <span class="shape cloud-b">☁</span>
+  </div>
+
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Misi harian keluarga</p>
+        <h1>Tombol Hadiah</h1>
+        <p class="hero-copy">Pilih anak, selesaikan misi, kumpulkan poin, lalu buka hadiah kejutan.</p>
+      </div>
+      <button class="music-button" id="musicButton" type="button" title="Putar atau hentikan lagu">
+        <span id="musicIcon">♪</span>
+        <span id="musicLabel">Musik</span>
+      </button>
+    </header>
+
+    <section class="status-strip">
+      <div>
+        <span class="dot online" id="connectionDot"></span>
+        <span id="connectionText">Menghubungkan data...</span>
+      </div>
+      <div id="lastSaved">Siap bermain</div>
+    </section>
+
+    <section class="children-tabs" id="anakTabs" aria-label="Pilih anak"></section>
+
+    <section class="dashboard">
+      <article class="player-card" id="playerCard">
+        <div class="avatar" id="avatarAktif">⭐</div>
+        <div>
+          <p class="mini-label">Sekarang giliran</p>
+          <h2 id="namaAnakAktif">Memuat...</h2>
+          <p><strong id="poinAnakAktif">0</strong> poin terkumpul</p>
+        </div>
+      </article>
+
+      <div class="score-grid">
+        <article class="score-card">
+          <span id="totalTugas">0</span>
+          <p>Total misi</p>
+        </article>
+        <article class="score-card">
+          <span id="tugasSelesai">0</span>
+          <p>Selesai</p>
+        </article>
+        <article class="score-card">
+          <span id="nilai">0%</span>
+          <p>Nilai hari ini</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="progress-panel">
+      <div class="progress-info">
+        <strong>Perjalanan menuju hadiah</strong>
+        <span id="progressText">0 dari 1000 poin</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress" id="progress"></div>
+      </div>
+    </section>
+
+    <section class="mission-board">
+      <div class="section-heading">
+        <div>
+          <p class="mini-label">Ketuk kalau selesai</p>
+          <h2>Misi Hari Ini</h2>
+        </div>
+        <div class="quick-actions">
+          <button class="icon-action success" id="completeAllButton" type="button" title="Tandai semua misi selesai">✓</button>
+          <button class="icon-action warn" id="resetDayButton" type="button" title="Reset status hari ini">↺</button>
+        </div>
+      </div>
+      <div class="mission-grid" id="gridTombol"></div>
+    </section>
+
+    <section class="reward-panel">
+      <button class="gacha-button" id="btnGacha" type="button">
+        <span>🎁</span>
+        <strong>Gacha Hadiah</strong>
+        <small>Butuh 1000 poin</small>
+      </button>
+      <div class="gacha-result" id="hasilGacha" hidden></div>
+    </section>
+
+    <section class="manage-grid">
+      <article class="manage-panel">
+        <div class="section-heading compact">
+          <div>
+            <p class="mini-label">Tambah atau ubah</p>
+            <h2>Misi Anak</h2>
+          </div>
+        </div>
+        <form class="form" id="taskForm">
+          <input id="inputTugas" type="text" maxlength="80" placeholder="Nama misi baru" autocomplete="off" />
+          <div class="form-row">
+            <select id="inputIkon" aria-label="Ikon misi"></select>
+            <select id="inputPoin" aria-label="Poin misi">
+              <option value="5">5 poin</option>
+              <option value="10" selected>10 poin</option>
+              <option value="15">15 poin</option>
+              <option value="20">20 poin</option>
+              <option value="25">25 poin</option>
+              <option value="50">50 poin</option>
+            </select>
+          </div>
+          <button class="primary-button" type="submit">Tambah Misi</button>
+        </form>
+        <div class="list" id="daftarTugas"></div>
+      </article>
+
+      <article class="manage-panel">
+        <div class="section-heading compact">
+          <div>
+            <p class="mini-label">Daftar kejutan</p>
+            <h2>Hadiah Gacha</h2>
+          </div>
+        </div>
+        <form class="form" id="giftForm">
+          <input id="inputHadiah" type="text" maxlength="80" placeholder="Nama hadiah baru" autocomplete="off" />
+          <button class="primary-button" type="submit">Tambah Hadiah</button>
+        </form>
+        <div class="list" id="daftarHadiah"></div>
+      </article>
+    </section>
+
+    <section class="history-panel">
+      <div class="section-heading compact">
+        <div>
+          <p class="mini-label">Kemenangan terbaru</p>
+          <h2>Riwayat Hadiah</h2>
+        </div>
+      </div>
+      <div class="list" id="riwayatHadiah"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
