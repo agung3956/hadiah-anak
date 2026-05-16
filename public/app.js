@@ -4,6 +4,44 @@ const ikonPilihan = [
   "🚲", "💪", "🍎", "🎒", "✅", "💡", "🎁", "🍬", "🎮", "📺"
 ];
 
+const defaultTasks = [
+  { id: "task-subuh", nama: "Subuh", ikon: "🕌", poin: 20 },
+  { id: "task-dzuhur", nama: "Dzuhur", ikon: "🕌", poin: 20 },
+  { id: "task-ashar", nama: "Ashar", ikon: "🕌", poin: 20 },
+  { id: "task-maghrib", nama: "Maghrib", ikon: "🕌", poin: 20 },
+  { id: "task-isya", nama: "Isya", ikon: "🕌", poin: 20 },
+  { id: "task-ngaji", nama: "ngaji", ikon: "📖", poin: 25 },
+  { id: "task-murojaah", nama: "murojaah", ikon: "🎧", poin: 25 },
+  { id: "task-rumah", nama: "rumah", ikon: "🏠", poin: 10 },
+  { id: "task-bersih", nama: "bersih", ikon: "🧹", poin: 10 },
+  { id: "task-cuci", nama: "cuci", ikon: "🧺", poin: 10 },
+  { id: "task-belajar", nama: "belajar", ikon: "📚", poin: 15 },
+  { id: "task-baju", nama: "baju", ikon: "👕", poin: 10 },
+  { id: "task-tanaman", nama: "tanaman", ikon: "🌱", poin: 10 },
+  { id: "task-sampah", nama: "sampah", ikon: "🗑️", poin: 10 },
+  { id: "task-masak", nama: "masak", ikon: "🍚", poin: 10 },
+  { id: "task-belanja", nama: "belanja", ikon: "🛒", poin: 10 },
+  { id: "task-minum", nama: "minum", ikon: "🥛", poin: 5 },
+  { id: "task-tidur", nama: "tidur", ikon: "🛏️", poin: 10 },
+  { id: "task-sikat-gigi", nama: "sikat gigi", ikon: "🪥", poin: 10 },
+  { id: "task-mandi", nama: "mandi", ikon: "🚿", poin: 10 },
+  { id: "task-rapikan-mainan", nama: "rapikan mainan", ikon: "🧸", poin: 10 },
+  { id: "task-prioritas", nama: "prioritas", ikon: "⭐", poin: 20 }
+];
+
+const defaultGifts = [
+  { id: "gift-snack", nama: "Pilih camilan favorit" },
+  { id: "gift-game", nama: "Main game 20 menit" },
+  { id: "gift-kartun", nama: "Nonton kartun 20 menit" },
+  { id: "gift-jalan", nama: "Jalan sore bersama Aya dan Ami" },
+  { id: "gift-es", nama: "Beli es krim" },
+  { id: "gift-menu", nama: "Pilih menu makan malam" },
+  { id: "gift-stiker", nama: "Stiker bintang spesial" },
+  { id: "gift-tabungan", nama: "Bonus uang tabungan Rp5.000" },
+  { id: "gift-buku", nama: "Bebas pilih buku cerita" },
+  { id: "gift-main", nama: "Waktu main tambahan 15 menit" }
+];
+
 const fallbackPenaltyPresets = [
   { id: "pen-lupa", nama: "Lupa tugas setelah diingatkan", poin: 5 },
   { id: "pen-main", nama: "Mainan tidak dirapikan", poin: 10 },
@@ -13,6 +51,7 @@ const fallbackPenaltyPresets = [
 ];
 
 const avatarImages = {
+  "anak-ahmad": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLBaLO3LtT9-3hxGp52sYBNhBwwoGotMFnig&s",
   "anak-silsilia": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTD9Fb-8Q2xZ-k_xSVWMtLpYBv-x25rZ7HajA&s",
   "anak-aqso": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKfLgszyJ7MHJqN2qAFsEpxry00jpcAbSbSg&s"
 };
@@ -23,20 +62,17 @@ const fallbackData = {
   anakAktif: 0,
   penaltyPresets: fallbackPenaltyPresets,
   anak: [
-    { id: "anak-ahmad", nama: "Ahmad Firdaus Thabrani", avatarText: "IM", avatarName: "Iron Man", warna: "#dc2626", accent: "#facc15", saldo: 0, tugas: [], harian: {} },
-    { id: "anak-silsilia", nama: "Silsilia Raihana Adni", avatarText: "MM", avatarName: "My Melody", warna: "#db2777", accent: "#fecdd3", saldo: 0, tugas: [], harian: {} },
-    { id: "anak-aqso", nama: "Muhammad Aqso Darussalam", avatarText: "TAYO", avatarName: "Bus Tayo", warna: "#2563eb", accent: "#60a5fa", saldo: 0, tugas: [], harian: {} }
+    { id: "anak-ahmad", nama: "Ahmad Firdaus Thabrani", avatarText: "IM", avatarName: "Iron Man", warna: "#dc2626", accent: "#facc15", saldo: 0, tugas: structuredClone(defaultTasks), harian: {} },
+    { id: "anak-silsilia", nama: "Silsilia Raihana Adni", avatarText: "MM", avatarName: "My Melody", warna: "#db2777", accent: "#fecdd3", saldo: 0, tugas: structuredClone(defaultTasks), harian: {} },
+    { id: "anak-aqso", nama: "Muhammad Aqso Darussalam", avatarText: "TAYO", avatarName: "Bus Tayo", warna: "#2563eb", accent: "#60a5fa", saldo: 0, tugas: structuredClone(defaultTasks), harian: {} }
   ],
-  hadiah: [],
+  hadiah: structuredClone(defaultGifts),
   riwayat: []
 };
 
 let data = structuredClone(fallbackData);
 let selectedDate = todayKey();
 let lastGacha = null;
-let audioContext = null;
-let musicTimer = null;
-let isMusicPlaying = false;
 let offlineMode = false;
 
 const $ = selector => document.querySelector(selector);
@@ -74,10 +110,7 @@ const elements = {
   connectionDot: $("#connectionDot"),
   connectionText: $("#connectionText"),
   lastSaved: $("#lastSaved"),
-  todayLabel: $("#todayLabel"),
-  musicButton: $("#musicButton"),
-  musicIcon: $("#musicIcon"),
-  musicLabel: $("#musicLabel")
+  todayLabel: $("#todayLabel")
 };
 
 function anakSekarang() {
@@ -107,6 +140,7 @@ function normalizeData() {
   data.today ||= todayKey();
   selectedDate = data.today;
   data.penaltyPresets ||= fallbackPenaltyPresets;
+  data.hadiah = mergeDefaultGifts(data.hadiah || []);
   data.anak = data.anak.map((child, index) => {
     const fallback = fallbackData.anak[index] || fallbackData.anak[0];
     child.avatarText = fallback.avatarText;
@@ -118,7 +152,7 @@ function normalizeData() {
     child.harian ||= {};
     getDay(child, selectedDate);
     delete child.poin;
-    child.tugas = (child.tugas || []).map(task => ({
+    child.tugas = mergeDefaultTasks(child.tugas || []).map(task => ({
       id: task.id || `task-${Date.now()}-${Math.random()}`,
       nama: task.nama || "Misi",
       ikon: task.ikon || "⭐",
@@ -126,6 +160,33 @@ function normalizeData() {
     }));
     return child;
   });
+}
+
+function mergeDefaultTasks(tasks) {
+  const normalized = Array.isArray(tasks) ? tasks : [];
+  const names = new Set(normalized.map(task => String(task.nama || "").toLowerCase()));
+  const ids = new Set(normalized.map(task => task.id));
+  const merged = [...normalized];
+  defaultTasks.forEach(task => {
+    if (!ids.has(task.id) && !names.has(task.nama.toLowerCase())) {
+      merged.push(structuredClone(task));
+    }
+  });
+  return merged;
+}
+
+function mergeDefaultGifts(gifts) {
+  const normalized = Array.isArray(gifts) ? gifts : [];
+  const names = new Set(normalized.map(gift => String(gift.nama || gift || "").toLowerCase()));
+  const merged = normalized.map((gift, index) => (
+    typeof gift === "string" ? { id: `gift-local-${index}`, nama: gift } : gift
+  ));
+  defaultGifts.forEach(gift => {
+    if (!names.has(gift.nama.toLowerCase())) {
+      merged.push(structuredClone(gift));
+    }
+  });
+  return merged;
 }
 
 function isiPilihanIkon() {
@@ -628,80 +689,6 @@ async function runGacha() {
   render();
 }
 
-function setupMusic() {
-  elements.musicButton.addEventListener("click", toggleMusic);
-  document.addEventListener("pointerdown", () => {
-    if (!isMusicPlaying) startMusic();
-  }, { once: true });
-  startMusic();
-}
-
-function ensureAudio() {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  return audioContext;
-}
-
-function startMusic() {
-  try {
-    const context = ensureAudio();
-    if (context.state === "suspended") context.resume();
-    if (musicTimer) return;
-    isMusicPlaying = true;
-    updateMusicUi();
-    playMelody();
-    musicTimer = setInterval(playMelody, 5200);
-  } catch (error) {
-    isMusicPlaying = false;
-    updateMusicUi();
-  }
-}
-
-function stopMusic() {
-  clearInterval(musicTimer);
-  musicTimer = null;
-  isMusicPlaying = false;
-  updateMusicUi();
-}
-
-function toggleMusic() {
-  if (isMusicPlaying) stopMusic();
-  else startMusic();
-}
-
-function playMelody() {
-  const context = ensureAudio();
-  const now = context.currentTime + 0.03;
-  const notes = [
-    [523.25, 0], [587.33, 0.28], [659.25, 0.56], [523.25, 0.84],
-    [523.25, 1.18], [587.33, 1.46], [659.25, 1.74], [523.25, 2.02],
-    [659.25, 2.36], [698.46, 2.64], [783.99, 2.92],
-    [659.25, 3.3], [698.46, 3.58], [783.99, 3.86],
-    [783.99, 4.24], [880, 4.52], [783.99, 4.8], [698.46, 5.08], [659.25, 5.36]
-  ];
-  notes.forEach(([frequency, offset]) => playTone(context, frequency, now + offset, 0.2));
-}
-
-function playTone(context, frequency, start, duration) {
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-  oscillator.type = "triangle";
-  oscillator.frequency.value = frequency;
-  gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(0.055, start + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-  oscillator.connect(gain).connect(context.destination);
-  oscillator.start(start);
-  oscillator.stop(start + duration + 0.03);
-}
-
-function updateMusicUi() {
-  elements.musicButton.classList.toggle("playing", isMusicPlaying);
-  elements.musicIcon.textContent = isMusicPlaying ? "♫" : "♪";
-  elements.musicLabel.textContent = isMusicPlaying ? "Nyala" : "Musik";
-}
-
 function todayKey() {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Jakarta",
@@ -762,5 +749,4 @@ elements.resetDay.addEventListener("click", resetDay);
 elements.gacha.addEventListener("click", runGacha);
 
 isiPilihanIkon();
-setupMusic();
 loadState();
