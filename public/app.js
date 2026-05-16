@@ -75,6 +75,8 @@ let selectedDate = todayKey();
 let lastGacha = null;
 let offlineMode = false;
 
+const remoteApiUrl = (window.TOMBOL_HADIAH_API_URL || "").trim();
+
 const $ = selector => document.querySelector(selector);
 
 const elements = {
@@ -209,6 +211,24 @@ function isiPilihanIkon() {
 }
 
 async function api(path, options = {}) {
+  if (remoteApiUrl) {
+    const method = options.method || "GET";
+    const body = options.body ? JSON.parse(options.body) : {};
+    const response = await fetch(remoteApiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ path, method, body })
+    });
+    const payload = await response.json();
+    if (!payload.ok) throw new Error(payload.error || "Google Sheet tidak merespons.");
+    if (payload.data) {
+      data = payload.data;
+      normalizeData();
+      persistLocal();
+    }
+    return payload;
+  }
+
   const response = await fetch(path, {
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     ...options
@@ -238,6 +258,21 @@ function restoreLocal() {
 async function loadState() {
   restoreLocal();
   render();
+  if (remoteApiUrl) {
+    try {
+      const payload = await api("/api/state");
+      data = payload.data;
+      normalizeData();
+      offlineMode = false;
+      updateConnection(true, "Data terhubung ke Google Sheet");
+    } catch (error) {
+      offlineMode = true;
+      updateConnection(false, "Google Sheet belum terhubung");
+    }
+    render();
+    return;
+  }
+
   if (location.protocol === "file:") {
     offlineMode = true;
     updateConnection(false, "Buka lewat Jalankan Tombol Hadiah.bat agar backend aktif");
