@@ -57,7 +57,7 @@ const avatarImages = {
 };
 
 const fallbackData = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   today: todayKey(),
   anakAktif: 0,
   penaltyPresets: fallbackPenaltyPresets,
@@ -141,6 +141,19 @@ function normalizeData() {
   selectedDate = data.today;
   data.penaltyPresets ||= fallbackPenaltyPresets;
   data.hadiah = mergeDefaultGifts(data.hadiah || []);
+  if (!data.ahmadInitialResetDone) {
+    const ahmad = (data.anak || []).find(child => child.id === "anak-ahmad");
+    if (ahmad) {
+      ahmad.saldo = 0;
+      if (ahmad.harian && ahmad.harian[selectedDate]) {
+        ahmad.harian[selectedDate].completed = [];
+        ahmad.harian[selectedDate].earned = 0;
+        ahmad.harian[selectedDate].deducted = 0;
+        ahmad.harian[selectedDate].penalties = [];
+      }
+    }
+    data.ahmadInitialResetDone = true;
+  }
   data.anak = data.anak.map((child, index) => {
     const fallback = fallbackData.anak[index] || fallbackData.anak[0];
     child.avatarText = fallback.avatarText;
@@ -225,6 +238,12 @@ function restoreLocal() {
 async function loadState() {
   restoreLocal();
   render();
+  if (location.protocol === "file:") {
+    offlineMode = true;
+    updateConnection(false, "Buka lewat Jalankan Tombol Hadiah.bat agar backend aktif");
+    render();
+    return;
+  }
   try {
     const payload = await api("/api/state");
     data = payload.data;

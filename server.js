@@ -43,7 +43,8 @@ const defaultPenaltyPresets = [
 ];
 
 const defaultData = {
-  schemaVersion: 2,
+  schemaVersion: 3,
+  ahmadInitialResetDone: true,
   anakAktif: 0,
   penaltyPresets: clone(defaultPenaltyPresets),
   anak: [
@@ -139,7 +140,8 @@ function writeStore(data) {
 
 function migrateData(data) {
   const migrated = { ...clone(defaultData), ...data };
-  migrated.schemaVersion = 2;
+  migrated.schemaVersion = 3;
+  migrated.ahmadInitialResetDone = true;
   migrated.penaltyPresets = Array.isArray(data.penaltyPresets) ? data.penaltyPresets : clone(defaultPenaltyPresets);
   migrated.hadiah = normalizeGifts(data.hadiah);
   migrated.riwayat = Array.isArray(data.riwayat) ? data.riwayat : [];
