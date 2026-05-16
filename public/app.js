@@ -12,6 +12,11 @@ const fallbackPenaltyPresets = [
   { id: "pen-jujur", nama: "Tidak jujur", poin: 25 }
 ];
 
+const avatarImages = {
+  "anak-silsilia": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTD9Fb-8Q2xZ-k_xSVWMtLpYBv-x25rZ7HajA&s",
+  "anak-aqso": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKfLgszyJ7MHJqN2qAFsEpxry00jpcAbSbSg&s"
+};
+
 const fallbackData = {
   schemaVersion: 2,
   today: todayKey(),
@@ -106,6 +111,7 @@ function normalizeData() {
     const fallback = fallbackData.anak[index] || fallbackData.anak[0];
     child.avatarText = fallback.avatarText;
     child.avatarName = fallback.avatarName;
+    child.avatarImage = avatarImages[child.id] || child.avatarImage || "";
     child.warna = fallback.warna;
     child.accent = fallback.accent;
     child.saldo = Number.isFinite(Number(child.saldo)) ? Number(child.saldo) : Number(child.poin || 0);
@@ -215,7 +221,7 @@ function render() {
 function renderTabsAnak() {
   elements.tabs.innerHTML = data.anak.map((anak, index) => `
     <button class="child-tab ${index === data.anakAktif ? "active" : ""}" style="--accent:${anak.warna}" data-child-index="${index}" type="button">
-      <span class="face avatar-mini" style="background:linear-gradient(135deg, ${anak.warna}, ${anak.accent});">${escapeHtml(anak.avatarText)}</span>
+      <span class="face avatar-mini" style="background:linear-gradient(135deg, ${anak.warna}, ${anak.accent});">${avatarMarkup(anak, "mini")}</span>
       <span>
         <strong>${escapeHtml(shortName(anak.nama))}</strong>
         <span>${anak.saldo} saldo poin</span>
@@ -240,7 +246,7 @@ function renderDashboard() {
 
   elements.playerCard.style.setProperty("--active-color", anak.warna || "#2563eb");
   elements.playerCard.style.setProperty("--active-accent", anak.accent || "#facc15");
-  elements.avatar.textContent = anak.avatarText || "⭐";
+  elements.avatar.innerHTML = avatarMarkup(anak, "large");
   elements.avatar.dataset.avatar = anak.avatarName || "";
   elements.nama.textContent = anak.nama;
   elements.poin.textContent = anak.saldo;
@@ -710,6 +716,13 @@ function todayKey() {
 
 function shortName(name) {
   return name.split(" ").slice(0, 2).join(" ");
+}
+
+function avatarMarkup(child, size) {
+  if (child.avatarImage) {
+    return `<img class="avatar-photo avatar-photo-${size}" src="${escapeHtml(child.avatarImage)}" alt="${escapeHtml(child.nama)}" onerror="this.remove()">`;
+  }
+  return escapeHtml(child.avatarText || "⭐");
 }
 
 function formatDateOnly(value) {

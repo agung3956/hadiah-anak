@@ -15,16 +15,23 @@ const defaultTasks = [
   { id: "task-ashar", nama: "Ashar", ikon: "🕌", poin: 20 },
   { id: "task-maghrib", nama: "Maghrib", ikon: "🕌", poin: 20 },
   { id: "task-isya", nama: "Isya", ikon: "🕌", poin: 20 },
-  { id: "task-ngaji", nama: "Ngaji", ikon: "📖", poin: 25 },
-  { id: "task-murojaah", nama: "Murojaah", ikon: "🎧", poin: 25 },
-  { id: "task-rumah", nama: "Bantu rumah", ikon: "🏠", poin: 10 },
-  { id: "task-bersih", nama: "Bersih-bersih", ikon: "🧹", poin: 10 },
-  { id: "task-cuci", nama: "Cuci piring", ikon: "🧽", poin: 10 },
-  { id: "task-belajar", nama: "Belajar", ikon: "📚", poin: 15 },
-  { id: "task-baju", nama: "Rapikan baju", ikon: "👕", poin: 10 },
-  { id: "task-tanaman", nama: "Siram tanaman", ikon: "🌱", poin: 10 },
-  { id: "task-sampah", nama: "Buang sampah", ikon: "🗑️", poin: 10 },
-  { id: "task-main", nama: "Rapikan mainan", ikon: "🧸", poin: 10 }
+  { id: "task-ngaji", nama: "ngaji", ikon: "📖", poin: 25 },
+  { id: "task-murojaah", nama: "murojaah", ikon: "🎧", poin: 25 },
+  { id: "task-rumah", nama: "rumah", ikon: "🏠", poin: 10 },
+  { id: "task-bersih", nama: "bersih", ikon: "🧹", poin: 10 },
+  { id: "task-cuci", nama: "cuci", ikon: "🧺", poin: 10 },
+  { id: "task-belajar", nama: "belajar", ikon: "📚", poin: 15 },
+  { id: "task-baju", nama: "baju", ikon: "👕", poin: 10 },
+  { id: "task-tanaman", nama: "tanaman", ikon: "🌱", poin: 10 },
+  { id: "task-sampah", nama: "sampah", ikon: "🗑️", poin: 10 },
+  { id: "task-masak", nama: "masak", ikon: "🍚", poin: 10 },
+  { id: "task-belanja", nama: "belanja", ikon: "🛒", poin: 10 },
+  { id: "task-minum", nama: "minum", ikon: "🥛", poin: 5 },
+  { id: "task-tidur", nama: "tidur", ikon: "🛏️", poin: 10 },
+  { id: "task-sikat-gigi", nama: "sikat gigi", ikon: "🪥", poin: 10 },
+  { id: "task-mandi", nama: "mandi", ikon: "🚿", poin: 10 },
+  { id: "task-rapikan-mainan", nama: "rapikan mainan", ikon: "🧸", poin: 10 },
+  { id: "task-prioritas", nama: "prioritas", ikon: "⭐", poin: 20 }
 ];
 
 const defaultPenaltyPresets = [
@@ -82,7 +89,9 @@ const defaultData = {
     { id: "gift-es", nama: "Beli es krim" },
     { id: "gift-menu", nama: "Pilih menu makan malam" },
     { id: "gift-stiker", nama: "Stiker bintang spesial" },
-    { id: "gift-tabungan", nama: "Bonus uang tabungan Rp5.000" }
+    { id: "gift-tabungan", nama: "Bonus uang tabungan Rp5.000" },
+    { id: "gift-buku", nama: "Bebas pilih buku cerita" },
+    { id: "gift-main", nama: "Waktu main tambahan 15 menit" }
   ],
   riwayat: []
 };
@@ -140,7 +149,7 @@ function migrateData(data) {
       ...clone(template),
       ...child,
       saldo: Number.isFinite(Number(child.saldo)) ? Number(child.saldo) : Number(child.poin || 0),
-      tugas: normalizeTasks(child.tugas && child.tugas.length ? child.tugas : template.tugas),
+      tugas: mergeDefaultTasks(normalizeTasks(child.tugas && child.tugas.length ? child.tugas : template.tugas)),
       harian: child.harian && typeof child.harian === "object" ? child.harian : {}
     };
     next.avatarText = template.avatarText;
@@ -164,13 +173,30 @@ function normalizeTasks(tasks) {
   }));
 }
 
+function mergeDefaultTasks(tasks) {
+  const normalized = Array.isArray(tasks) ? tasks : [];
+  const names = new Set(normalized.map(task => task.nama.toLowerCase()));
+  const ids = new Set(normalized.map(task => task.id));
+  const merged = [...normalized];
+  defaultTasks.forEach(task => {
+    if (!ids.has(task.id) && !names.has(task.nama.toLowerCase())) {
+      merged.push(clone(task));
+    }
+  });
+  return merged;
+}
+
 function normalizeGifts(gifts) {
-  if (!Array.isArray(gifts)) return clone(defaultData.hadiah);
-  return gifts.map((gift, index) => (
+  const normalized = !Array.isArray(gifts) ? [] : gifts.map((gift, index) => (
     typeof gift === "string"
       ? { id: newId(`gift-${index}`), nama: cleanText(gift, "Hadiah") }
       : { id: gift.id || newId(`gift-${index}`), nama: cleanText(gift.nama, "Hadiah") }
   ));
+  const names = new Set(normalized.map(gift => gift.nama.toLowerCase()));
+  defaultData.hadiah.forEach(gift => {
+    if (!names.has(gift.nama.toLowerCase())) normalized.push(clone(gift));
+  });
+  return normalized;
 }
 
 function migrateLegacyCompleted(child) {
