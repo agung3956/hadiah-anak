@@ -1,0 +1,19 @@
+{
+  "name": "Tombol Hadiah",
+  "short_name": "Hadiah",
+  "description": "Aplikasi misi harian dan hadiah berbasis poin.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fef3c7",
+  "theme_color": "#facc15",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
