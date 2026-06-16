@@ -17,12 +17,21 @@ window.TOMBOL_HADIAH_API_URL = "https://script.google.com/macros/s/AKfycbwSnEa7u
   appleIcon.href = "icon.svg";
   document.head.appendChild(appleIcon);
 
+  const menuCss = document.createElement("link");
+  menuCss.rel = "stylesheet";
+  menuCss.href = "menu-layout.css";
+  document.head.appendChild(menuCss);
+
   const theme = document.createElement("meta");
   theme.name = "theme-color";
   theme.content = "#facc15";
   document.head.appendChild(theme);
 
   window.addEventListener("load", () => {
+    const menuScript = document.createElement("script");
+    menuScript.src = "menu-layout.js";
+    document.body.appendChild(menuScript);
+
     const fastUx = document.createElement("script");
     fastUx.src = "instant-ux.js";
     document.body.appendChild(fastUx);
