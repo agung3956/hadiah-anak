@@ -1,0 +1,1 @@
+window.TOMBOL_HADIAH_TOOLS_READY = true;
