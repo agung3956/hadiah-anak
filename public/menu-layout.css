@@ -1,0 +1,153 @@
+.app-menu {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0 16px;
+  padding: 10px;
+  background: rgba(255,255,255,.92);
+  border: 2px solid rgba(255,255,255,.8);
+  border-radius: 22px;
+  box-shadow: 0 14px 32px rgba(30,41,59,.14);
+  backdrop-filter: blur(10px);
+}
+
+.menu-tab {
+  min-height: 54px;
+  border: 0;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+}
+
+.menu-tab span {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.menu-tab small {
+  font-size: .72rem;
+}
+
+.menu-tab.active {
+  background: linear-gradient(135deg, #facc15, #fb7185);
+  color: #4a2600;
+  box-shadow: inset 0 -5px 0 rgba(120,53,15,.12);
+}
+
+.date-context-panel {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 16px;
+  padding: 12px;
+  background: #fff7ed;
+  border: 2px solid rgba(251,146,60,.35);
+  border-radius: 20px;
+  box-shadow: 0 10px 22px rgba(30,41,59,.08);
+}
+
+.date-context-title {
+  font-weight: 900;
+  color: #7c2d12;
+}
+
+.date-context-subtitle {
+  margin-top: 2px;
+  color: #9a3412;
+  font-size: .86rem;
+  font-weight: 800;
+}
+
+.date-context-panel input {
+  min-width: 150px;
+}
+
+body[data-menu="dashboard"] .penalty-panel,
+body[data-menu="dashboard"] .mission-board,
+body[data-menu="dashboard"] .reward-panel,
+body[data-menu="dashboard"] .manage-grid,
+body[data-menu="dashboard"] .history-panel,
+body[data-menu="dashboard"] .date-context-panel {
+  display: none;
+}
+
+body[data-menu="misi"] .dashboard,
+body[data-menu="misi"] .progress-panel,
+body[data-menu="misi"] .reward-panel,
+body[data-menu="misi"] .manage-grid,
+body[data-menu="misi"] .history-panel {
+  display: none;
+}
+
+body[data-menu="hadiah"] .dashboard,
+body[data-menu="hadiah"] .progress-panel,
+body[data-menu="hadiah"] .penalty-panel,
+body[data-menu="hadiah"] .mission-board,
+body[data-menu="hadiah"] .manage-grid,
+body[data-menu="hadiah"] .history-panel,
+body[data-menu="hadiah"] .date-context-panel {
+  display: none;
+}
+
+body[data-menu="history"] .dashboard,
+body[data-menu="history"] .progress-panel,
+body[data-menu="history"] .penalty-panel,
+body[data-menu="history"] .mission-board,
+body[data-menu="history"] .reward-panel,
+body[data-menu="history"] .manage-grid,
+body[data-menu="history"] .date-context-panel {
+  display: none;
+}
+
+body[data-menu="atur"] .dashboard,
+body[data-menu="atur"] .progress-panel,
+body[data-menu="atur"] .penalty-panel,
+body[data-menu="atur"] .mission-board,
+body[data-menu="atur"] .reward-panel,
+body[data-menu="atur"] .history-panel,
+body[data-menu="atur"] .date-context-panel {
+  display: none;
+}
+
+.daily-card {
+  cursor: pointer;
+}
+
+.daily-card::after {
+  content: "Klik untuk isi tanggal ini";
+  display: block;
+  margin-top: 8px;
+  font-size: .78rem;
+  font-weight: 900;
+  color: #2563eb;
+}
+
+@media (max-width: 720px) {
+  .app-menu {
+    grid-template-columns: repeat(5, 72px);
+    overflow-x: auto;
+    justify-content: start;
+    scrollbar-width: none;
+  }
+
+  .app-menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  .date-context-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .date-context-panel input,
+  .date-context-panel button {
+    width: 100%;
+  }
+}
