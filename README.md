@@ -46,3 +46,7 @@ window.TOMBOL_HADIAH_API_URL = "https://script.google.com/macros/s/DEPLOYMENT_ID
 ```
 
 Setelah itu semua perangkat yang membuka frontend akan memakai data yang sama dari Google Sheet.
+
+## Tombol Hadiah 2.0
+
+Entry point GitHub Pages tetap `public/index.html`. V2 menggunakan ledger lokal per perangkat dan migrasi backup non-destruktif dari data existing; perubahan V2 belum disinkronkan ke Google Sheet. Jalankan `npm test` dan `npm run build` sebelum publikasi. Audit, arsitektur, penggunaan, hasil test dan batasan: [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md).
