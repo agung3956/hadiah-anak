@@ -89,7 +89,7 @@ function routeRequest(path, method, body) {
         return { ok: true, state: remote.state, revision: remote.revision, updatedAt: remote.updatedAt, legacy: remote.state ? null : readLegacyRawState() };
       }
       if (method === 'PUT') {
-        if (!body || !body.state || body.state.dataVersion !== 2) throw new Error('State V2 tidak valid.');
+        if (!body || !body.state || [2, 3].indexOf(Number(body.state.dataVersion)) === -1) throw new Error('State V2 tidak valid.');
         const current = readV2State();
         if (body.baseRevision !== null && body.baseRevision !== undefined && Number(body.baseRevision) !== Number(current.revision || 0)) {
           throw new Error('conflict: data Sheet lebih baru.');
