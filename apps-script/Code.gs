@@ -1,6 +1,10 @@
 const SPREADSHEET_ID = '1JPmK5LsYCMfdM8S0a94OTIlg0waRuOFYTYO_0T4SG98';
 const STATE_SHEET = 'State';
 const STATE_KEY = 'appState';
+const V2_SHEET = 'StateV2';
+const V2_META_KEY = 'v2Meta';
+const V2_CHUNK_KEY = 'v2Chunk';
+const V2_CHUNK_SIZE = 40000;
 const TIME_ZONE = 'Asia/Jakarta';
 
 const defaultTasks = [
@@ -79,6 +83,22 @@ function routeRequest(path, method, body) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
+    if (path === '/api/v2/state') {
+      if (method === 'GET') {
+        const remote = readV2State();
+        return { ok: true, state: remote.state, revision: remote.revision, updatedAt: remote.updatedAt, legacy: remote.state ? null : readLegacyRawState() };
+      }
+      if (method === 'PUT') {
+        if (!body || !body.state || body.state.dataVersion !== 2) throw new Error('State V2 tidak valid.');
+        const current = readV2State();
+        if (body.baseRevision !== null && body.baseRevision !== undefined && Number(body.baseRevision) !== Number(current.revision || 0)) {
+          throw new Error('conflict: data Sheet lebih baru.');
+        }
+        const saved = writeV2State(body.state, current.revision || 0);
+        return { ok: true, revision: saved.revision, updatedAt: saved.updatedAt };
+      }
+    }
+
     const data = readState();
     const today = todayKey();
 
@@ -238,6 +258,56 @@ function routeRequest(path, method, body) {
   } finally {
     lock.releaseLock();
   }
+}
+
+function readLegacyRawState() {
+  const sheet = getStateSheet();
+  const stored = sheet.getRange(2, 2).getValue();
+  return stored ? JSON.parse(stored) : null;
+}
+
+function readV2State() {
+  const sheet = getV2Sheet();
+  const values = sheet.getDataRange().getValues();
+  let meta = { revision: 0, updatedAt: '' };
+  const chunks = [];
+  values.forEach(row => {
+    if (row[0] === V2_META_KEY && row[1]) meta = JSON.parse(row[1]);
+    if (String(row[0] || '').indexOf(V2_CHUNK_KEY + ':') === 0) {
+      chunks[Number(String(row[0]).split(':')[1])] = String(row[1] || '');
+    }
+  });
+  const json = chunks.join('');
+  return { state: json ? JSON.parse(json) : null, revision: Number(meta.revision || 0), updatedAt: meta.updatedAt || '' };
+}
+
+function writeV2State(state, previousRevision) {
+  const sheet = getV2Sheet();
+  const revision = Number(previousRevision || 0) + 1;
+  const updatedAt = new Date().toISOString();
+  const next = clone(state);
+  next.updatedAt = updatedAt;
+  next.sync = Object.assign({}, next.sync || {}, {
+    provider: 'google-sheet',
+    spreadsheetId: SPREADSHEET_ID,
+    revision: revision,
+    updatedAt: updatedAt
+  });
+  const json = JSON.stringify(next);
+  const chunks = [];
+  for (let i = 0; i < json.length; i += V2_CHUNK_SIZE) chunks.push(json.slice(i, i + V2_CHUNK_SIZE));
+  const rows = [[V2_META_KEY, JSON.stringify({ revision: revision, updatedAt: updatedAt, chunks: chunks.length })]];
+  chunks.forEach((chunk, index) => rows.push([V2_CHUNK_KEY + ':' + index, chunk]));
+  sheet.clearContents();
+  sheet.getRange(1, 1, rows.length, 2).setValues(rows);
+  return { revision: revision, updatedAt: updatedAt };
+}
+
+function getV2Sheet() {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let sheet = spreadsheet.getSheetByName(V2_SHEET);
+  if (!sheet) sheet = spreadsheet.insertSheet(V2_SHEET);
+  return sheet;
 }
 
 function readState() {

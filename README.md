@@ -47,6 +47,8 @@ window.TOMBOL_HADIAH_API_URL = "https://script.google.com/macros/s/DEPLOYMENT_ID
 
 Setelah itu semua perangkat yang membuka frontend akan memakai data yang sama dari Google Sheet.
 
+Untuk Tombol Hadiah 2.0, Apps Script membuat tab `StateV2` otomatis. Data V2 disimpan sebagai beberapa baris chunk agar tidak terkena batas 50.000 karakter per sel Google Sheets. Tab `State` tetap dipakai sebagai arsip data lama dan tidak ditimpa oleh sinkron V2.
+
 ## Tombol Hadiah 2.0
 
-Entry point GitHub Pages tetap `public/index.html`. V2 menggunakan ledger lokal per perangkat dan migrasi backup non-destruktif dari data existing; perubahan V2 belum disinkronkan ke Google Sheet. Jalankan `npm test` dan `npm run build` sebelum publikasi. Audit, arsitektur, penggunaan, hasil test dan batasan: [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md).
+Entry point GitHub Pages tetap `public/index.html`. V2 memakai ledger lokal yang otomatis sinkron ke Google Sheet melalui endpoint `/api/v2/state`; saat offline, perubahan tetap disimpan lokal dan akan dicoba lagi ketika aplikasi terbuka. Migrasi data existing bersifat non-destruktif: saldo poin, misi, completion harian, penalti, gacha lama, dan snapshot mentah lama tetap ikut terbawa ke format V2. Jalankan `npm test` dan `npm run build` sebelum publikasi. Audit, arsitektur, penggunaan, hasil test dan batasan: [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md).
