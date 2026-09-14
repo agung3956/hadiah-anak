@@ -53,8 +53,9 @@ Legacy memakai schemaVersion 3 sehingga V2 menggunakan dataVersion 2 terpisah. S
 6. Acceptance: `npm test` dan `npm run build`. Browser: `npm install`, pastikan Edge terpasang, lalu `npm run test:browser`.
 
 ## Deployment
-URL existing tetap https://agung3956.github.io/hadiah-anak/public/index.html. Perubahan ini BELUM dipublikasikan. Tidak ada workflow Pages pada repository awal. Setelah review, commit/push ke branch yang dikonfigurasi GitHub Pages dengan folder root; public/index.html akan tetap tersedia pada path lama. Identitas commit diberikan pengguna: agung3956 <agung3956@gmail.com>. Status publikasi akhir dilaporkan terpisah setelah push dan pemeriksaan URL.
+URL existing tetap https://agung3956.github.io/hadiah-anak/public/index.html. Implementasi dipublikasikan melalui commit fbd7799 ke main. Verifikasi 14 September 2026: URL public/index.html HTTP 200 dengan title Tombol Hadiah 2.0 dan referensi v2/domain.js; aset domain juga HTTP 200. Path publik tidak berubah. Tidak ada workflow baru yang diperlukan. Identitas commit diberikan pengguna: agung3956 <agung3956@gmail.com>. Pengujian transaksi menggunakan fixture lokal; tidak memutasi data keluarga di URL publik.
 
 ## Tahap berikutnya
 Prioritaskan uji migrasi dengan export data keluarga nyata (tanpa menghapus sumber), transaksi/locking lintas tab, penyempurnaan kontrol PIN dan backend otoritatif. Setelah itu lengkapi pengelolaan target/profil, badge, serta shortcut fitur legacy. Jangan menambahkan bunga, uang menjadi poin, atau pembayaran nyata.
+
 
