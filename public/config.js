@@ -1,4 +1,4 @@
-window.TOMBOL_HADIAH_API_URL = "https://script.google.com/macros/s/AKfycbwSnEa7uD7uLROxC9VU1aWgZcfg295X8Bz5H6K3CDU8A2SZ4YKtdrli4GVHk9vchThD/exec";
+window.TOMBOL_HADIAH_API_URL = "https://script.google.com/macros/s/AKfycbxWdgdgkv4UPskgzgaQWjWwq1cG8O1am6dwqjxR1CAuu9FgkSdpLwj00oT1vBCxYX5X/exec";
 
 (function setupPwa() {
   const manifest = document.createElement("link");

@@ -1,6 +1,6 @@
 (function(root){
 'use strict';
-const DEFAULT_ENDPOINT='https://script.google.com/macros/s/AKfycbwSnEa7uD7uLROxC9VU1aWgZcfg295X8Bz5H6K3CDU8A2SZ4YKtdrli4GVHk9vchThD/exec';
+const DEFAULT_ENDPOINT='https://script.google.com/macros/s/AKfycbxWdgdgkv4UPskgzgaQWjWwq1cG8O1am6dwqjxR1CAuu9FgkSdpLwj00oT1vBCxYX5X/exec';
 const META_KEY='tombolHadiahV2SyncMeta';
 const statusText={idle:'Siap sinkron',syncing:'Menyinkronkan...',offline:'Offline, tersimpan lokal',conflict:'Data Sheet lebih baru',error:'Sinkron tertunda'};
 function readMeta(){try{return JSON.parse(localStorage.getItem(META_KEY)||'{}')}catch{return {}}}
